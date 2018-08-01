@@ -9,6 +9,8 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "svg.js": "^2.6.5",
+    "two.js": "^0.7.0-alpha.1",
     "vue": "^2.5.16"
   },
   "devDependencies": {
