@@ -7,49 +7,66 @@
 <script>
 import Two from 'two.js';
 
+// after some testing I stop using this library in favor of svg.js
+// this lib implies to call draw.update() when values changes & it does not work well
+// lack of clear documentation is also a concern
+
+let draw = null;
+
 export default {
   name: 'drawTwoJs',
   props: {
     title: String,
-    radius: Number,
+    parentParams: {
+      Type: Object,
+      default() { return { radius: 30 }; },
+    },
   },
   data() {
     return {
-      two: null,
       circle: null,
+      params: { radius: 10 },
     };
   },
   watch: {
-    radius(newVal, oldVal) { // watch it
-      console.log('drawTwojs radius changed: ', newVal, ' | was: ', oldVal);
-      this.circle.radius = newVal;
-      this.two.update();
+    parentParams(newVal, oldVal) {
+      this.params = Object.assign({}, newVal);
+      console.log('Watch parentParams', this.params, newVal);
+      draw.update(); // this one does not update screen...
     },
   },
+  created() {
+    this.$nextTick(function () {
+      if (draw != null) draw.update();
+      console.log('nextTick : ', this.params);
+    });
+  },
   mounted() {
-    const two = new Two({ width: 300, height: 300 }).appendTo(this.$refs.draw);
-    this.two = two;
-    console.log(two);
+    this.params = Object.assign({}, this.parentParams);
+    this.$nextTick(function () {
+      if (draw != null) draw.update();
+      console.log('nextTick : ', this.params);
+    });
+    draw = new Two({ width: 300, height: 300 }).appendTo(this.$refs.draw);
+    console.log(draw);
 
     const text = new Two.Text(this.title, 150, 50);
     text.size = 25;
-    two.add(text);
-    const circle = two.makeCircle(150, 150, this.radius);
+    draw.add(text);
+
+    const circle = draw.makeCircle(150, 150, this.params.radius);
     this.circle = circle;
     circle.r = 100;
     circle.fill = '#ffff1c';
     circle.stroke = 'red';
     circle.linewidth = 10;
-    console.log(circle);
 
-    const rect = two.makeRoundedRectangle(150, 150, 200, 120, 10);
+    const rect = draw.makeRoundedRectangle(150, 150, 200, 120, 10);
     rect.fill = 'rgb(0, 200, 255)';
     rect.opacity = 0.5;
     rect.noStroke();
 
-    // Don't forget to tell two to render everything
-    // to the screen
-    two.update();
+    draw.update();
   },
 };
 </script>
