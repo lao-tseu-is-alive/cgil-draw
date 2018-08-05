@@ -9,6 +9,8 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.0.0-beta.49",
+    "cgil-log": "^1.0.4",
     "svg.draggable.js": "^2.2.1",
     "svg.js": "^2.6.5",
     "two.js": "^0.7.0-alpha.1",
@@ -16,7 +18,6 @@
     "vuetify": "^1.0.19"
   },
   "devDependencies": {
-    "@babel/polyfill": "^7.0.0-beta.49",
     "@vue/cli-plugin-babel": "^3.0.0-rc.10",
     "@vue/cli-plugin-eslint": "^3.0.0-rc.10",
     "@vue/cli-plugin-unit-jest": "^3.0.0-rc.10",

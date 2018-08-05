@@ -2,8 +2,8 @@
     .paper {
         background: white;
         border: 1px solid black;
-        min-height: 400px;
-        min-width: 400px;
+        min-height: 300px;
+        min-width: 300px;
     }
 
 </style>
@@ -84,7 +84,7 @@
         >
             <v-toolbar-title style="width: 300px" class="ml-0 pl-3">
                 <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                <span class="hidden-sm-and-down">Google Contacts</span>
+                <span class="hidden-sm-and-down">CGil-Draw</span>
             </v-toolbar-title>
             <v-text-field
                     flat
@@ -118,7 +118,7 @@
             </v-container>
         </v-content>
         <v-footer :fixed="fixed" app>
-            <span>&copy; 2017</span>
+            <span class="svg-wh">WxH: {{`${svgWidth}x${svgHeight}`}}</span>
         </v-footer>
         <v-btn
                 fab
@@ -196,9 +196,13 @@
 </template>
 
 <script>
+import Log from 'cgil-log';
 import SVG from 'svg.js';
 import 'svg.draggable.js';
 
+const DEV = process.env.NODE_ENV === 'development';
+const MODULE_NAME = 'cgil-draw';
+const log = (DEV) ? new Log(MODULE_NAME, 4) : new Log(MODULE_NAME, 1);
 let draw = null;
 
 export default {
@@ -208,9 +212,11 @@ export default {
   },
   data: () => ({
     params: { radius: 50 },
+    svgWidth: null,
+    svgHeight: null,
     title: 'SVG.JS',
     circle: null,
-    rec:null,
+    rec: null,
     fixed: true,
     dialog: false,
     drawer: null,
@@ -278,19 +284,25 @@ export default {
     source: String,
   },
   computed: {
-    myClonedParams() {
-      return Object.assign({}, this.params);
+    svgCenter2() {
+      return { cx: (this.svgWidth / 2), cy: (this.svgHeight / 2) };
+    },
+    svgCenter() {
+      return [(this.svgWidth / 2), (this.svgHeight / 2)];
     },
   },
   mounted() {
-    // this.params = Object.assign({}, this.parentParams);
+    log.t('# IN mounted()');
     draw = SVG(this.$refs.draw);
+    log.l('draw SVG.JS :', draw);
+    this.svgWidth = draw.viewbox().width;
+    this.svgHeight = draw.viewbox().height;
     draw.text(this.title)
-      .center(150, 50)
+      .center(this.svgCenter2.cx, 50)
       .size(25);
 
     this.circle = draw.circle().radius(this.params.radius)
-      .center(150, 150)
+      .center(...this.svgCenter)
       .fill('#ffff1c')
       .stroke({ color: 'red', width: 10 });
 
@@ -300,6 +312,14 @@ export default {
       .fill('rgb(0, 200, 255)')
       .opacity(0.5)
       .draggable();
+
+    window.onresize = () => {
+      // const w = this.$refs.draw;
+      // log.l(`# IN onresize client Width x Height : ${w.clientWidth} x ${w.clientHeight}`);
+      this.svgWidth = draw.viewbox().width;
+      this.svgHeight = draw.viewbox().height;
+      this.circle.center(...this.svgCenter);
+    };
   },
 };
 </script>
