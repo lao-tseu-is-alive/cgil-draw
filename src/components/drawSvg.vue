@@ -29,7 +29,7 @@ export default {
     return {
       circle: null,
       rect: null,
-      params: { radius: 10 },
+      params: { radius: 5 },
     };
   },
   watch: {
@@ -48,7 +48,7 @@ export default {
     this.circle = draw.circle().radius(this.params.radius)
       .center(150, 150)
       .fill('#ffff1c')
-      .stroke({ color: 'red', width: 10 });
+      .stroke({ color: 'red', width: 5 });
 
     this.rec = draw.rect(200, 120)
       .center(150, 150)

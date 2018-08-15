@@ -5,6 +5,9 @@
         min-height: 300px;
         min-width: 300px;
     }
+    .svg-zoom {
+        padding-left: 0.5rem;
+    }
 
 </style>
 
@@ -119,6 +122,7 @@
         </v-content>
         <v-footer :fixed="fixed" app>
             <span class="svg-wh">WxH: {{`${svgWidth}x${svgHeight}`}}</span>
+            <span class="svg-zoom">Zoom : {{`${zoom}`}}</span>
         </v-footer>
         <v-btn
                 fab
@@ -199,6 +203,7 @@
 import Log from 'cgil-log';
 import SVG from 'svg.js';
 import 'svg.draggable.js';
+import 'svg.panzoom.js';
 
 const DEV = process.env.NODE_ENV === 'development';
 const MODULE_NAME = 'cgil-draw';
@@ -211,7 +216,8 @@ export default {
   components: {
   },
   data: () => ({
-    params: { radius: 50 },
+    params: { radius: 25 },
+    zoom: 1,
     svgWidth: null,
     svgHeight: null,
     title: 'SVG.JS',
@@ -293,7 +299,11 @@ export default {
   },
   mounted() {
     log.t('# IN mounted()');
-    draw = SVG(this.$refs.draw);
+    draw = SVG(this.$refs.draw).panZoom({ zoomMin: 0.5, zoomMax: 20 });
+    draw.on('zoom', (ev) => {
+      log.l('zoom event :', ev);
+      this.zoom = draw.zoom().toFixed(2);
+    })
     log.l('draw SVG.JS :', draw);
     this.svgWidth = draw.viewbox().width;
     this.svgHeight = draw.viewbox().height;
@@ -304,15 +314,17 @@ export default {
     this.circle = draw.circle().radius(this.params.radius)
       .center(...this.svgCenter)
       .fill('#ffff1c')
-      .stroke({ color: 'red', width: 10 });
+      .stroke({ color: 'red', width: 2 });
 
     this.rec = draw.rect(200, 120)
       .center(150, 150)
       .radius(10)
       .fill('rgb(0, 200, 255)')
       .opacity(0.5)
-      .draggable();
-
+      .draggable((x, y) => ({
+        x: x > 10 && x < (this.svgWidth - 210),
+        y: y > 10 && y < (this.svgHeight - 130),
+      }));
     window.onresize = () => {
       // const w = this.$refs.draw;
       // log.l(`# IN onresize client Width x Height : ${w.clientWidth} x ${w.clientHeight}`);
