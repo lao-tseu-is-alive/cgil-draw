@@ -7,6 +7,7 @@
     }
     .svg-zoom {
         padding-left: 0.5rem;
+        padding-right: 0.5rem;
     }
 
 </style>
@@ -123,6 +124,7 @@
         <v-footer :fixed="fixed" app>
             <span class="svg-wh">WxH: {{`${svgWidth}x${svgHeight}`}}</span>
             <span class="svg-zoom">Zoom : {{`${zoom}`}}</span>
+            <span class="svg-mousePos">Mouse Pos: {{`${mouseSvgPos.x}, ${mouseSvgPos.y}`}}</span>
         </v-footer>
         <v-btn
                 fab
@@ -218,6 +220,7 @@ export default {
   data: () => ({
     params: { radius: 25 },
     zoom: 1,
+    mouseSvgPos: { x: 0, y: 0 },
     svgWidth: null,
     svgHeight: null,
     title: 'SVG.JS',
@@ -300,11 +303,25 @@ export default {
   mounted() {
     log.t('# IN mounted()');
     draw = SVG(this.$refs.draw).panZoom({ zoomMin: 0.5, zoomMax: 20 });
+    // events
+    draw.on('mousemove', (ev) => {
+      log.l('mousemove event :', ev);
+      this.mouseSvgPos.x = ev.clientX - draw.rbox().x;
+      this.mouseSvgPos.y = ev.clientY - draw.rbox().y;
+    })
     draw.on('zoom', (ev) => {
       log.l('zoom event :', ev);
       this.zoom = draw.zoom().toFixed(2);
     })
+    draw.on('dblclick', (ev) => {
+      log.l('dblclick event :', ev);
+      const x = ev.clientX - draw.rbox().x;
+      const y = ev.clientY - draw.rbox().y;
+      draw.zoom((draw.zoom() * 1.5), new SVG.Point(x,y));
+    })
     log.l('draw SVG.JS :', draw);
+    log.l('draw svg viewbox :', draw.viewbox());
+    log.l('draw svg rbox :', draw.rbox());
     this.svgWidth = draw.viewbox().width;
     this.svgHeight = draw.viewbox().height;
     draw.text(this.title)
