@@ -54,7 +54,7 @@
                         <v-list-tile
                                 v-for="(child, i) in item.children"
                                 :key="i"
-                                @click=""
+                                @click="toggle(child.text)"
                         >
                             <v-list-tile-action v-if="child.icon">
                                 <v-icon>{{ child.icon }}</v-icon>
@@ -66,7 +66,8 @@
                             </v-list-tile-content>
                         </v-list-tile>
                     </v-list-group>
-                    <v-list-tile v-else :key="item.text" @click="">
+                    <v-list-tile v-else :key="item.text"
+                                 @click="toggle(`${item.text}|${item.action}`)">
                         <v-list-tile-action>
                             <v-icon>{{ item.icon }}</v-icon>
                         </v-list-tile-action>
@@ -231,16 +232,19 @@ export default {
     drawer: null,
     items: [
       {
-        icon: 'contacts',
-        text: 'Contacts',
+        icon: 'zoom_in',
+        text: 'Zoom in',
+        action: 'zoomIn',
       },
       {
-        icon: 'history',
-        text: 'Frequently contacted',
+        icon: 'zoom_out',
+        text: 'Zoom out',
+        action: 'zoomOut',
       },
       {
-        icon: 'content_copy',
-        text: 'Duplicates',
+        icon: 'fullscreen',
+        text: 'Zoom extent',
+        action: 'zoomExtent',
       },
       {
         icon: 'keyboard_arrow_up',
@@ -305,7 +309,7 @@ export default {
     draw = SVG(this.$refs.draw).panZoom({ zoomMin: 0.5, zoomMax: 20 });
     // events
     draw.on('mousemove', (ev) => {
-      log.l('mousemove event :', ev);
+      // log.l('mousemove event :', ev);
       this.mouseSvgPos.x = ev.clientX - draw.rbox().x;
       this.mouseSvgPos.y = ev.clientY - draw.rbox().y;
     })
@@ -349,6 +353,27 @@ export default {
       this.svgHeight = draw.viewbox().height;
       this.circle.center(...this.svgCenter);
     };
+  }, // end of mounted
+  methods: {
+    runFunction(name, params=null) {
+      const fn = this[name];
+      if (typeof fn !== 'function') return;
+      fn.apply(this, params);
+    },
+    toggle(index) {
+      log.t(`# IN toggle(${index})`);
+      const action = index.split('|')[1];
+      if (action) this.runFunction(action);
+    },
+    zoomIn() {
+      draw.zoom(draw.zoom() * 1.5);
+    },
+    zoomOut() {
+      draw.zoom(draw.zoom() * 0.75);
+    },
+    zoomExtent() {
+      draw.zoom(1);
+    },
   },
 };
 </script>
